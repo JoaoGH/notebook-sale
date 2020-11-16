@@ -40,34 +40,34 @@ class Application:
     def __init__(self, master=None):
         self.records = []
 
-        master.geometry('900x800')
+        master.geometry('1600x650')
         self.fonte = ("Verdana", "8")   
         
         self.containerGeral = Frame(master)
-        self.containerGeral.pack(fill=BOTH, expand=YES)
+        #self.containerGeral.pack(fill=BOTH, expand=YES)
+        self.containerGeral.pack(fill=Y, expand=YES)
         
         self.containerSelectFile = Frame(self.containerGeral)
         #self.containerSelectFile["pady"] = 10
         self.containerSelectFile.pack()
         
         self.containerMenu = Frame(self.containerGeral)
-        #self.containerMenu["padx"] = 20
-        #self.containerMenu["pady"] = 5
-        self.containerMenu.pack(side=LEFT, anchor='nw', fill=Y, expand=YES)
+        #self.containerMenu.pack(side=LEFT, anchor='nw', fill=Y, expand=YES)
+        self.containerMenu.pack()
         
         self.containerBotoes = Frame(self.containerMenu)
-        #self.containerBotoes["padx"] = 20
-        #self.containerBotoes["pady"] = 5
+        self.containerBotoes["padx"] = 20
+        self.containerBotoes["pady"] = 20
         self.containerBotoes.pack(fill=X, anchor='nw')
-        #self.containerFiltros = Frame(self.containerMenu)
-        #self.containerFiltros.pack()
-        #self.containerFiltros = Frame(self.containerMenu)
-        #self.containerFiltros.pack()
-        #self.containerFiltros = Frame(self.containerMenu)
-        #self.containerFiltros.pack()
+        self.containerFiltros = Frame(self.containerMenu)
+        self.containerFiltros["pady"] = 20
+        self.containerFiltros.pack()
         
         self.containerTable = Frame(self.containerGeral)
         self.containerTable.pack()
+        self.tree = None
+        self.filtrarButton = None
+
         self.container6 = Frame(master)
         self.container6["padx"] = 20
         self.container6["pady"] = 5
@@ -94,7 +94,7 @@ class Application:
         self.titulo = Label(self.containerSelectFile, text="Selecione o arquivo")
         self.titulo["font"] = ("Calibri", "9", "bold")
         self.titulo.pack()
-        self.btnBuscar = Button(self.containerSelectFile, text="Buscar", font=self.fonte, width=10)
+        self.btnBuscar = Button(self.containerSelectFile, text="Buscar Arquivo", font=self.fonte)
         self.btnBuscar["command"] = self.buscarArquivo
         self.btnBuscar.pack(side=RIGHT)
        
@@ -162,7 +162,7 @@ class Application:
             self.brandLabel.destroy()
         if hasattr(self, 'brandEntry'):
             self.brandEntry.destroy()
-    
+
     def enableLaptoNameFilter(self):
         self.clearFiltersContainer()
         self.laptopNameLabel = Label(self.containerFiltros, text="Laptop Name: ", font=self.fonte)
@@ -172,6 +172,12 @@ class Application:
         self.laptopNameEntry["font"] = self.fonte
         self.laptopNameEntry.pack(side=LEFT)
 
+        if (self.filtrarButton != None):
+            self.filtrarButton.destroy()
+        self.filtrarButton = Button(self.containerFiltros, text='Filtrar', font=self.fonte)
+        self.filtrarButton["command"] = self.findByLaptopName
+        self.filtrarButton.pack()
+
     def enableDiskSpaceFilter(self):
         self.clearFiltersContainer()
         self.diskSpaceLabel = Label(self.containerFiltros, text="Disk Space: ", font=self.fonte)
@@ -180,12 +186,19 @@ class Application:
         self.diskSpaceEntry["width"] = 30
         self.diskSpaceEntry["font"] = self.fonte
         self.diskSpaceEntry.pack(side=LEFT)
+        
+        if (self.filtrarButton != None):
+            self.filtrarButton.destroy()
+        self.filtrarButton = Button(self.containerFiltros, text='Filtrar', font=self.fonte)
+        self.filtrarButton["command"] = self.findByDiskSpace
+        self.filtrarButton.pack()
 
     def enableDateBrandFilter(self):
         self.clearFiltersContainer()
         self.dateYmdLabel = Label(self.containerFiltros, text="Date Ymd: ", font=self.fonte)
         self.dateYmdLabel.pack(side=LEFT)
         self.dateYmdEntry = Entry(self.containerFiltros)
+        #self.dateYmdEntry = Calendar(top, font=self.fonte, selectmode='day', cursor="hand1", year=2020, month=11, day=17)
         self.dateYmdEntry["width"] = 30
         self.dateYmdEntry["font"] = self.fonte
         self.dateYmdEntry.pack(side=LEFT)
@@ -196,47 +209,104 @@ class Application:
         self.brandEntry["width"] = 30
         self.brandEntry["font"] = self.fonte
         self.brandEntry.pack(side=LEFT)
+        
+        if (self.filtrarButton != None):
+            self.filtrarButton.destroy()
+        self.filtrarButton = Button(self.containerFiltros, text='Filtrar', font=self.fonte)
+        self.filtrarButton["command"] = self.findByDateYmdAndBrand
+        self.filtrarButton.pack()
 
     def enableAplicarDesconto(self):
         self.clearFiltersContainer()
-        print('ed')
+        if (self.filtrarButton != None):
+            self.filtrarButton.destroy()
+        print('enableAplicarDesconto')
+    
     def enableContagemRating(self):
         self.clearFiltersContainer()
-        print('ed')
+        if (self.filtrarButton != None):
+            self.filtrarButton.destroy()
+        print('enableContagemRating')
 
     def loadData(self, filePath):
+        self.showTable()
         arquivo = open(filePath)
         reader = csv.reader(arquivo)
         for line in list(reader)[1::]:
             rec = Record(line[0], line[1], line[2], line[3], line[4], line[5], line[6], line[7], line[8], line[9])
             self.records.append(rec)
         arquivo.close()
+        self.showRecordOnTable()
 
-    def findByLaptopName(self, laptopName):
+    def showTable(self):
+        self.tree = ttk.Treeview(self.containerTable, columns=("Date", "Brand", "LaptopName", "Display Size", "Processor", "Graphics Card", "Disk Space", "Discount", "List Price", "Rating"), height=20, selectmode="extended")
+        self.tree.heading('Date', text="Date", anchor=W)
+        self.tree.heading('Brand', text="Brand", anchor=W)
+        self.tree.heading('LaptopName', text="LaptopName", anchor=W)
+        self.tree.heading('Display Size', text="Display Size", anchor=W)
+        self.tree.heading('Processor', text="Processor", anchor=W)
+        self.tree.heading('Graphics Card', text="Graphics Card", anchor=W)
+        self.tree.heading('Disk Space', text="Disk Space", anchor=W)
+        self.tree.heading('Discount', text="Discount", anchor=W)
+        self.tree.heading('List Price', text="List Price", anchor=W)
+        self.tree.heading('Rating', text="Rating", anchor=W)
+        self.tree.column('#0', stretch=NO, minwidth=0, width=0)
+        self.tree.column('#1', stretch=NO, minwidth=0, width=100)
+        self.tree.column('#2', stretch=NO, minwidth=0, width=100)
+        self.tree.column('#3', stretch=NO, minwidth=0, width=110)
+        self.tree.column('#5', stretch=NO, minwidth=0, width=160)
+        self.tree.column('#6', stretch=NO, minwidth=0, width=160)
+        self.tree.column('#7', stretch=NO, minwidth=0, width=160)
+        self.tree.column('#8', stretch=NO, minwidth=0, width=160)
+        self.tree.column('#9', stretch=NO, minwidth=0, width=160)
+        self.tree.pack()
+
+    def showRecordOnTable(self):
+        for i in self.tree.get_children():
+            self.tree.delete(i)
+        for record in self.records:
+            if (record.filtered):
+                self.tree.insert('', END, values=(
+                    record.dateYmd,
+                    record.brand,
+                    record.laptopName,
+                    record.displaySize,
+                    record.processorType,
+                    record.graphicsCard,
+                    record.diskSpace,
+                    record.discountPrice,
+                    record.listPrice,
+                    record.rating
+                ))
+
+    def findByLaptopName(self):
+        laptopName = self.laptopNameEntry.get()
+        self.clearFilters()
         for record in self.records:
             if (record.filtered):
                 if (laptopName.upper() not in record.laptopName.upper()):
                     record.filtered = False
+        self.showRecordOnTable()
 
-    def findByDiskSpace(self, diskSpace):
+    def findByDiskSpace(self):
+        diskSpace = self.diskSpaceEntry.get()
+        self.clearFilters()
         for record in self.records:
             if (record.filtered):
                 if (diskSpace.upper() not in record.diskSpace.upper()):
                     record.filtered = False
+        self.showRecordOnTable()
 
-    def findByDateYmdAndBrand(self, dateYmd, brand):
+    def findByDateYmdAndBrand(self):
+        dateYmd = self.dateYmdEntry.get()
+        brand = self.brandEntry.get()
+        self.clearFilters()
         for record in self.records:
             if (record.filtered):
                 if (record.dateYmd != dateYmd or brand.upper() not in record.brand.upper()):
                     record.filtered = False
+        self.showRecordOnTable()
 
-    def totalFiltered(self):
-        total = 0
-        for record in self.records:
-            if (record.filtered):
-                total += 1
-        return total
-    
     def clearFilters(self):
         for record in self.records:
             record.filtered = True
@@ -300,12 +370,9 @@ root.mainloop()
 
 #sistema = Sistema('notebooks_sale.csv')
 #sistema.loadData()
-#print(sistema.totalFiltered())
 #sistema.findByLaptopName('VoStRo')
 #sistema.showAllFields()
-#print(sistema.totalFiltered())
 #sistema.clearFilters()
-#print(sistema.totalFiltered())
 #sistema.applyDiscount(1000, 5000, 10)
 #sistema.showAllFields()
 #sistema.saveNewFile('notebook_1.csv')
