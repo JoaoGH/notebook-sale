@@ -1,8 +1,8 @@
 import csv
-##import tkinter
 from tkinter import *
 from tkinter.filedialog import askopenfilename
 from tkinter import ttk
+import tkcalendar
 
 class Record:
 
@@ -44,15 +44,12 @@ class Application:
         self.fonte = ("Verdana", "8")   
         
         self.containerGeral = Frame(master)
-        #self.containerGeral.pack(fill=BOTH, expand=YES)
         self.containerGeral.pack(fill=Y, expand=YES)
         
         self.containerSelectFile = Frame(self.containerGeral)
-        #self.containerSelectFile["pady"] = 10
         self.containerSelectFile.pack()
         
         self.containerMenu = Frame(self.containerGeral)
-        #self.containerMenu.pack(side=LEFT, anchor='nw', fill=Y, expand=YES)
         self.containerMenu.pack()
         
         self.containerBotoes = Frame(self.containerMenu)
@@ -96,8 +93,7 @@ class Application:
         self.titulo.pack()
         self.btnBuscar = Button(self.containerSelectFile, text="Buscar Arquivo", font=self.fonte)
         self.btnBuscar["command"] = self.buscarArquivo
-        self.btnBuscar.pack(side=RIGHT)
-       
+        self.btnBuscar.pack(side=RIGHT)       
 
     def buscarArquivo(self):
         fileWindow = Tk()
@@ -198,7 +194,6 @@ class Application:
         self.dateYmdLabel = Label(self.containerFiltros, text="Date Ymd: ", font=self.fonte)
         self.dateYmdLabel.pack(side=LEFT)
         self.dateYmdEntry = Entry(self.containerFiltros)
-        #self.dateYmdEntry = Calendar(top, font=self.fonte, selectmode='day', cursor="hand1", year=2020, month=11, day=17)
         self.dateYmdEntry["width"] = 30
         self.dateYmdEntry["font"] = self.fonte
         self.dateYmdEntry.pack(side=LEFT)
@@ -282,29 +277,32 @@ class Application:
     def findByLaptopName(self):
         laptopName = self.laptopNameEntry.get()
         self.clearFilters()
-        for record in self.records:
-            if (record.filtered):
-                if (laptopName.upper() not in record.laptopName.upper()):
-                    record.filtered = False
+        if (laptopName != ''):
+            for record in self.records:
+                if (record.filtered):
+                    if (laptopName.upper() not in record.laptopName.upper()):
+                        record.filtered = False
         self.showRecordOnTable()
 
     def findByDiskSpace(self):
         diskSpace = self.diskSpaceEntry.get()
         self.clearFilters()
-        for record in self.records:
-            if (record.filtered):
-                if (diskSpace.upper() not in record.diskSpace.upper()):
-                    record.filtered = False
+        if (diskSpace != ''):
+            for record in self.records:
+                if (record.filtered):
+                    if (diskSpace.upper() not in record.diskSpace.upper()):
+                        record.filtered = False
         self.showRecordOnTable()
 
     def findByDateYmdAndBrand(self):
         dateYmd = self.dateYmdEntry.get()
         brand = self.brandEntry.get()
         self.clearFilters()
-        for record in self.records:
-            if (record.filtered):
-                if (record.dateYmd != dateYmd or brand.upper() not in record.brand.upper()):
-                    record.filtered = False
+        if (dateYmd != '' or brand != ''):
+            for record in self.records:
+                if (record.filtered):
+                    if (record.dateYmd != dateYmd or brand.upper() not in record.brand.upper()):
+                        record.filtered = False
         self.showRecordOnTable()
 
     def clearFilters(self):
@@ -362,19 +360,3 @@ class Application:
 root = Tk()
 Application(root)
 root.mainloop()
-##root = tkinter.Tk()
-##janela = tkinter.Tk()
-##janela.title("Pynder")
-##janela.geometry("400x700")
-##janela.mainloop()
-
-#sistema = Sistema('notebooks_sale.csv')
-#sistema.loadData()
-#sistema.findByLaptopName('VoStRo')
-#sistema.showAllFields()
-#sistema.clearFilters()
-#sistema.applyDiscount(1000, 5000, 10)
-#sistema.showAllFields()
-#sistema.saveNewFile('notebook_1.csv')
-#sistema.ratingCount()
-
