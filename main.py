@@ -283,6 +283,7 @@ class Application:
                     if (laptopName.upper() not in record.laptopName.upper()):
                         record.filtered = False
         self.showRecordOnTable()
+        self.hideColumns('laptopFilter')
 
     def findByDiskSpace(self):
         diskSpace = self.diskSpaceEntry.get()
@@ -293,6 +294,7 @@ class Application:
                     if (diskSpace.upper() not in record.diskSpace.upper()):
                         record.filtered = False
         self.showRecordOnTable()
+        self.hideColumns('diskFilter')
 
     def findByDateYmdAndBrand(self):
         dateYmd = self.dateYmdEntry.get()
@@ -304,6 +306,7 @@ class Application:
                     if (record.dateYmd != dateYmd or brand.upper() not in record.brand.upper()):
                         record.filtered = False
         self.showRecordOnTable()
+        self.hideColumns('dateBrandFilter')
 
     def clearFilters(self):
         for record in self.records:
@@ -356,6 +359,16 @@ class Application:
                 arquivo.write('\n')
         arquivo.close()
 
+    def hideColumns(self, opc):
+        displaycolumns = []
+        if (opc == 'laptopFilter'):
+            displaycolumns = ['Date','Brand','LaptopName','Display Size','Processor','Graphics Card','Disk Space','Discount','List Price','Rating']
+        elif (opc == 'diskFilter'):
+            # TODO: Campo old_price
+            displaycolumns = ['Brand','LaptopName','Discount']
+        elif (opc == 'dateBrandFilter'):
+            displaycolumns = ['LaptopName','Display Size','Disk Space','Discount','Rating']
+        self.tree["displaycolumns"] = displaycolumns
 
 root = Tk()
 Application(root)
