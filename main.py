@@ -80,16 +80,17 @@ class Application:
         self.container9 = Frame(master)
         self.container9["pady"] = 15
         self.container9.pack()
-            
+
         self.sair = Button(self.container9)
         self.sair["text"] = "Sair"
         self.sair["font"] = ("Calibri", "10")
         self.sair["width"] = 5
         self.sair["command"] = self.container9.quit
         self.sair.pack()
+        self.total = Label(self.container9)
+        self.total.pack()
         
         self.titulo = Label(self.containerSelectFile, text="Selecione o arquivo")
-        self.titulo["font"] = ("Calibri", "9", "bold")
         self.titulo.pack()
         self.btnBuscar = Button(self.containerSelectFile, text="Buscar Arquivo", font=self.fonte)
         self.btnBuscar["command"] = self.buscarArquivo
@@ -158,9 +159,27 @@ class Application:
             self.brandLabel.destroy()
         if hasattr(self, 'brandEntry'):
             self.brandEntry.destroy()
+        if hasattr(self, 'listPriceInicialLabel'):
+            self.listPriceInicialLabel.destroy()
+        if hasattr(self, 'listPriceInicialEntry'):
+            self.listPriceInicialEntry.destroy()
+        if hasattr(self, 'listPriceFinalLabel'):
+            self.listPriceFinalLabel.destroy()
+        if hasattr(self, 'listPriceFinalEntry'):
+            self.listPriceFinalEntry.destroy()
+        if hasattr(self, 'descontoDesejadoLabel'):
+            self.descontoDesejadoLabel.destroy()
+        if hasattr(self, 'descontoDesejadoEntry'):
+            self.descontoDesejadoEntry.destroy()
+        if hasattr(self, 'novoArquivoLabel'):
+            self.novoArquivoLabel.destroy()
+        if hasattr(self, 'novoArquivoEntry'):
+            self.novoArquivoEntry.destroy()
 
     def enableLaptoNameFilter(self):
         self.clearFiltersContainer()
+        self.showTable()
+
         self.laptopNameLabel = Label(self.containerFiltros, text="Laptop Name: ", font=self.fonte)
         self.laptopNameLabel.pack(side=LEFT)
         self.laptopNameEntry = Entry(self.containerFiltros)
@@ -176,6 +195,8 @@ class Application:
 
     def enableDiskSpaceFilter(self):
         self.clearFiltersContainer()
+        self.showTable()
+
         self.diskSpaceLabel = Label(self.containerFiltros, text="Disk Space: ", font=self.fonte)
         self.diskSpaceLabel.pack(side=LEFT)
         self.diskSpaceEntry = Entry(self.containerFiltros)
@@ -191,6 +212,8 @@ class Application:
 
     def enableDateBrandFilter(self):
         self.clearFiltersContainer()
+        self.showTable()
+        
         self.dateYmdLabel = Label(self.containerFiltros, text="Date Ymd: ", font=self.fonte)
         self.dateYmdLabel.pack(side=LEFT)
         self.dateYmdEntry = Entry(self.containerFiltros)
@@ -213,15 +236,47 @@ class Application:
 
     def enableAplicarDesconto(self):
         self.clearFiltersContainer()
+        self.showTable()
+        
+        self.listPriceInicialLabel = Label(self.containerFiltros, text="List Price Inicial: ", font=self.fonte)
+        self.listPriceInicialLabel.pack(side=LEFT)
+        self.listPriceInicialEntry = Entry(self.containerFiltros,validate="key")
+        self.listPriceInicialEntry["width"] = 30
+        self.listPriceInicialEntry["font"] = self.fonte
+        self.listPriceInicialEntry.pack(side=LEFT)
+
+        self.listPriceFinalLabel = Label(self.containerFiltros, text="List Price Final: ", font=self.fonte)
+        self.listPriceFinalLabel.pack(side=LEFT)
+        self.listPriceFinalEntry = Entry(self.containerFiltros)
+        self.listPriceFinalEntry["width"] = 30
+        self.listPriceFinalEntry["font"] = self.fonte
+        self.listPriceFinalEntry.pack(side=LEFT)
+
+        self.descontoDesejadoLabel = Label(self.containerFiltros, text="Desconto Desejado: ", font=self.fonte)
+        self.descontoDesejadoLabel.pack(side=LEFT)
+        self.descontoDesejadoEntry = Entry(self.containerFiltros)
+        self.descontoDesejadoEntry["width"] = 30
+        self.descontoDesejadoEntry["font"] = self.fonte
+        self.descontoDesejadoEntry.pack(side=LEFT)
+
+        self.novoArquivoLabel = Label(self.containerFiltros, text="Nome do Novo Arquivo: ", font=self.fonte)
+        self.novoArquivoLabel.pack(side=LEFT)
+        self.novoArquivoEntry = Entry(self.containerFiltros)
+        self.novoArquivoEntry["width"] = 30
+        self.novoArquivoEntry["font"] = self.fonte
+        self.novoArquivoEntry.pack(side=LEFT)
+
         if (self.filtrarButton != None):
             self.filtrarButton.destroy()
-        print('enableAplicarDesconto')
+        self.filtrarButton = Button(self.containerFiltros, text='Filtrar', font=self.fonte)
+        self.filtrarButton["command"] = self.applyDiscount
+        self.filtrarButton.pack()
     
     def enableContagemRating(self):
         self.clearFiltersContainer()
         if (self.filtrarButton != None):
             self.filtrarButton.destroy()
-        print('enableContagemRating')
+        self.ratingCount()
 
     def loadData(self, filePath):
         self.showTable()
@@ -234,6 +289,9 @@ class Application:
         self.showRecordOnTable()
 
     def showTable(self):
+        if (self.tree != None):
+            self.tree.destroy()
+        
         self.tree = ttk.Treeview(self.containerTable, columns=("Date", "Brand", "LaptopName", "Display Size", "Processor", "Graphics Card", "Disk Space", "Discount", "List Price", "Rating"), height=20, selectmode="extended")
         self.tree.heading('Date', text="Date", anchor=W)
         self.tree.heading('Brand', text="Brand", anchor=W)
@@ -257,6 +315,7 @@ class Application:
         self.tree.pack()
 
     def showRecordOnTable(self):
+        self.total['text'] = self.totalFiltered()
         for i in self.tree.get_children():
             self.tree.delete(i)
         for record in self.records:
@@ -328,20 +387,61 @@ class Application:
                 rating[4] += 1
             else:
                 rating[5] += 1
-        print('Total de 0.0 - 0.9: ' + str(rating[0]))
-        print('Total de 1.0 - 1.9: ' + str(rating[1]))
-        print('Total de 2.0 - 2.9: ' + str(rating[2]))
-        print('Total de 3.0 - 3.9: ' + str(rating[3]))
-        print('Total de 4.0 - 4.9: ' + str(rating[4]))
-        print('Total de 5.0: ' + str(rating[5]))
+        self.tree.destroy()
+        self.tree = ttk.Treeview(self.containerTable, columns=("Rating", "Total"), height=20, selectmode="extended")
+        self.tree.heading('Rating', text="Rating", anchor=W)
+        self.tree.heading('Total', text="Total", anchor=W)
+        self.tree.column('#0', stretch=NO, minwidth=0, width=0)
+        self.tree.column('#1', stretch=NO, minwidth=0, width=100)
+        self.tree.pack()
+        self.tree.insert('', END, values=(
+            '0.0 - 0.9',
+            rating[0]
+        ))
+        self.tree.insert('', END, values=(
+            '1.0 - 1.9',
+            rating[1]
+        ))
+        self.tree.insert('', END, values=(
+            '2.0 - 2.9',
+            rating[2]
+        ))
+        self.tree.insert('', END, values=(
+            '3.0 - 3.9',
+            rating[3]
+        ))
+        self.tree.insert('', END, values=(
+            '4.0 - 4.9',
+            rating[4]
+        ))
+        self.tree.insert('', END, values=(
+            '5.0',
+            rating[5]
+        ))
 
-    def applyDiscount(self, valorInicial, valorFinal, desconto):
-        for record in self.records:
-            if (record.filtered):
-                if (record.listPrice >= valorInicial and record.listPrice <= valorFinal):
-                    record.discountPrice = record.listPrice - (record.listPrice * (desconto/100))
-                else:
-                    record.filtered = False
+    def applyDiscount(self):
+        try:
+            self.clearFilters()
+            valorInicial = self.listPriceInicialEntry.get()
+            valorFinal = self.listPriceFinalEntry.get()
+            desconto = self.descontoDesejadoEntry.get()
+            novoArquivo = self.novoArquivoEntry.get()
+            if (valorInicial != '' and valorFinal != '' and desconto != ''):
+                valorInicial = float(valorInicial)
+                valorFinal = float(valorFinal)
+                desconto = float(desconto)
+                novoArquivo = self.novoArquivoEntry.get()
+                for record in self.records:
+                    if (record.filtered):
+                        if (record.listPrice >= valorInicial and record.listPrice <= valorFinal):
+                            record.discountPrice = record.listPrice - (record.listPrice * (desconto/100))
+                        else:
+                            record.filtered = False
+                self.showRecordOnTable()
+                self.saveNewFile(novoArquivo)
+                self.hideColumns('laptopFilter')
+        except ValueError:
+            print('Valor invalido')     
 
     def showAllFields(self):
         for record in self.records:
@@ -369,6 +469,13 @@ class Application:
         elif (opc == 'dateBrandFilter'):
             displaycolumns = ['LaptopName','Display Size','Disk Space','Discount','Rating']
         self.tree["displaycolumns"] = displaycolumns
+
+    def totalFiltered(self):
+        total = 0
+        for record in self.records:
+            if (record.filtered):
+                total += 1
+        return total
 
 root = Tk()
 Application(root)
