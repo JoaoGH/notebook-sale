@@ -65,29 +65,17 @@ class Application:
         self.tree = None
         self.filtrarButton = None
 
-        self.container6 = Frame(master)
-        self.container6["padx"] = 20
-        self.container6["pady"] = 5
-        self.container6.pack()
-        self.container7 = Frame(master)
-        self.container7["padx"] = 20
-        self.container7["pady"] = 5
-        self.container7.pack()
-        self.container8 = Frame(master)
-        self.container8["padx"] = 20
-        self.container8["pady"] = 10
-        self.container8.pack()
-        self.container9 = Frame(master)
-        self.container9["pady"] = 15
-        self.container9.pack()
+        self.containerFooter = Frame(master)
+        self.containerFooter["pady"] = 15
+        self.containerFooter.pack()
 
-        self.sair = Button(self.container9)
+        self.sair = Button(self.containerFooter)
         self.sair["text"] = "Sair"
         self.sair["font"] = ("Calibri", "10")
         self.sair["width"] = 5
-        self.sair["command"] = self.container9.quit
+        self.sair["command"] = self.containerFooter.quit
         self.sair.pack()
-        self.total = Label(self.container9)
+        self.total = Label(self.containerFooter)
         self.total.pack()
         
         self.titulo = Label(self.containerSelectFile, text="Selecione o arquivo")
@@ -364,8 +352,9 @@ class Application:
                 if (record.filtered):
                     if (record.dateYmd != dateYmd or brand.upper() not in record.brand.upper()):
                         record.filtered = False
-        self.showRecordOnTable()
         self.hideColumns('dateBrandFilter')
+        self.records.sort(key=lambda x: x.laptopName)
+        self.showRecordOnTable()
 
     def clearFilters(self):
         for record in self.records:
