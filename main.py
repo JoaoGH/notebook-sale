@@ -71,7 +71,7 @@ class Application:
 
         self.sair = Button(self.containerFooter)
         self.sair["text"] = "Sair"
-        self.sair["font"] = ("Calibri", "10")
+        self.sair["font"] = self.fonte
         self.sair["width"] = 5
         self.sair["command"] = self.containerFooter.quit
         self.sair.pack()
@@ -202,7 +202,7 @@ class Application:
         self.clearFiltersContainer()
         self.showTable()
         
-        self.dateYmdLabel = Label(self.containerFiltros, text="Date Ymd: ", font=self.fonte)
+        self.dateYmdLabel = Label(self.containerFiltros, text="Date (yyyy-mm-dd): ", font=self.fonte)
         self.dateYmdLabel.pack(side=LEFT)
         self.dateYmdEntry = Entry(self.containerFiltros)
         self.dateYmdEntry["width"] = 30
@@ -240,7 +240,7 @@ class Application:
         self.listPriceFinalEntry["font"] = self.fonte
         self.listPriceFinalEntry.pack(side=LEFT)
 
-        self.descontoDesejadoLabel = Label(self.containerFiltros, text="Desconto Desejado: ", font=self.fonte)
+        self.descontoDesejadoLabel = Label(self.containerFiltros, text="Desconto Desejado (%): ", font=self.fonte)
         self.descontoDesejadoLabel.pack(side=LEFT)
         self.descontoDesejadoEntry = Entry(self.containerFiltros)
         self.descontoDesejadoEntry["width"] = 30
@@ -377,7 +377,7 @@ class Application:
         dateYmd = self.dateYmdEntry.get()
         brand = self.brandEntry.get()
         self.clearFilters()
-        if (dateYmd != '' or brand != ''):
+        if (dateYmd != '' and brand != ''):
             for record in self.records:
                 if (record.filtered):
                     if (record.dateYmd != dateYmd or brand.upper() not in record.brand.upper()):
@@ -450,11 +450,10 @@ class Application:
             valorFinal = self.listPriceFinalEntry.get()
             desconto = self.descontoDesejadoEntry.get()
             novoArquivo = self.novoArquivoEntry.get()
-            if (valorInicial != '' and valorFinal != '' and desconto != ''):
+            if (valorInicial != '' and valorFinal != '' and desconto != '' and novoArquivo != ''):
                 valorInicial = float(valorInicial)
                 valorFinal = float(valorFinal)
                 desconto = float(desconto)
-                novoArquivo = self.novoArquivoEntry.get()
                 for record in self.records:
                     if (record.filtered):
                         if (record.listPrice >= valorInicial and record.listPrice <= valorFinal):
