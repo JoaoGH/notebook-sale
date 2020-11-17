@@ -37,6 +37,7 @@ class Record:
         return toShow
 
 class Application:
+    
     def __init__(self, master=None):
         self.records = []
 
@@ -295,6 +296,7 @@ class Application:
         self.tree.column('#1', stretch=NO, minwidth=0, width=100)
         self.tree.column('#2', stretch=NO, minwidth=0, width=100)
         self.tree.column('#3', stretch=NO, minwidth=0, width=110)
+        self.tree.column('#4', stretch=NO, minwidth=0, width=160)
         self.tree.column('#5', stretch=NO, minwidth=0, width=160)
         self.tree.column('#6', stretch=NO, minwidth=0, width=160)
         self.tree.column('#7', stretch=NO, minwidth=0, width=160)
@@ -340,8 +342,36 @@ class Application:
                 if (record.filtered):
                     if (diskSpace.upper() not in record.diskSpace.upper()):
                         record.filtered = False
-        self.showRecordOnTable()
+        self.createTableDiskSpace()
+        self.showRecordOnTableDiskSpace()
         self.hideColumns('diskFilter')
+
+    def createTableDiskSpace(self):
+        self.tree.destroy()
+        self.tree = ttk.Treeview(self.containerTable, columns=("Brand", "LaptopName", "Discount", "List Price", "Discount Amount"), height=20, selectmode="extended")
+        self.tree.heading('Brand', text="Brand", anchor=W)
+        self.tree.heading('LaptopName', text="LaptopName", anchor=W)
+        self.tree.heading('Discount', text="Discount", anchor=W)
+        self.tree.heading('List Price', text="List Price", anchor=W)
+        self.tree.heading('Discount Amount', text="Discount Amount", anchor=W)
+        self.tree.column('#0', stretch=NO, minwidth=0, width=0)
+        self.tree.column('#1', stretch=NO, minwidth=0, width=100)
+        self.tree.column('#2', stretch=NO, minwidth=0, width=100)
+        self.tree.column('#3', stretch=NO, minwidth=0, width=110)
+        self.tree.column('#4', stretch=NO, minwidth=0, width=110)
+        self.tree.pack()
+
+    def showRecordOnTableDiskSpace(self):
+        for record in self.records:
+            if (record.filtered):
+                discountAmount = record.listPrice - record.discountPrice
+                self.tree.insert('', END, values=(
+                    record.brand,
+                    record.laptopName,
+                    record.discountPrice,
+                    record.listPrice,
+                    discountAmount
+                ))
 
     def findByDateYmdAndBrand(self):
         dateYmd = self.dateYmdEntry.get()
@@ -453,8 +483,7 @@ class Application:
         if (opc == 'laptopFilter'):
             displaycolumns = ['Date','Brand','LaptopName','Display Size','Processor','Graphics Card','Disk Space','Discount','List Price','Rating']
         elif (opc == 'diskFilter'):
-            # TODO: Campo old_price
-            displaycolumns = ['Brand','LaptopName','Discount']
+            displaycolumns = ['Brand','LaptopName','Discount', 'List Price', 'Discount Amount']
         elif (opc == 'dateBrandFilter'):
             displaycolumns = ['LaptopName','Display Size','Disk Space','Discount','Rating']
         self.tree["displaycolumns"] = displaycolumns
