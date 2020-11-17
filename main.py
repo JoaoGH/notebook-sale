@@ -2,7 +2,6 @@ import csv
 from tkinter import *
 from tkinter.filedialog import askopenfilename
 from tkinter import ttk
-import tkcalendar
 
 class Record:
 
@@ -362,6 +361,7 @@ class Application:
         self.tree.pack()
 
     def showRecordOnTableDiskSpace(self):
+        self.total['text'] = self.totalFiltered()
         for record in self.records:
             if (record.filtered):
                 discountAmount = record.listPrice - record.discountPrice
@@ -391,6 +391,7 @@ class Application:
             record.filtered = True
 
     def ratingCount(self):
+        self.clearFilters()
         rating = [0,0,0,0,0,0]
         for record in self.records:
             recordRating = record.preparateRating()
@@ -406,6 +407,10 @@ class Application:
                 rating[4] += 1
             else:
                 rating[5] += 1
+        self.showRecordOnTableRating(rating)
+
+    def showRecordOnTableRating(self, rating):
+        self.total['text'] = self.totalFiltered()
         self.tree.destroy()
         self.tree = ttk.Treeview(self.containerTable, columns=("Rating", "Total"), height=20, selectmode="extended")
         self.tree.heading('Rating', text="Rating", anchor=W)
